@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
+import { computed, onMounted } from 'vue'
 import RoomRow from '../components/RoomRow.vue';
 
 import { useRoomStore } from '../stores/room';
@@ -10,8 +11,36 @@ import FilterComponent from '../components/FilterComponent.vue';
 
 const roomStore = useRoomStore()
 
+const roomDates = computed(() => {
+  const dates = new Set<string>()
+  const today = dayjs().format('YYYY-MM-DD')
+  // Añadir siempre el día actual
+  dates.add(today)
 
+  roomStore.rooms.forEach((room) => {
+    room.state?.forEach((state) => {
+      if (state.reserved_date && (state.reserved_date >= today)) dates.add(state.reserved_date)
+      roomStore.rooms.sort((a, b) => {
+       if (a.id > b.id) {
+                        return 1;
+                    }
+                    if (a.id < b.id) {
+                        return -1;
+                    }
+                    // a must be equal to b
+                    return 0;
+    })
+    })
+  })
 
+  // Ordenar para que la visualización sea coherente
+  return [...dates].sort((a, b) => dayjs(a).isBefore(dayjs(b)) ? -1 : 1)
+})
+
+onMounted(() => {
+
+  void roomStore.fetchRooms()
+})
 
 </script>
 <template>
@@ -25,17 +54,14 @@ const roomStore = useRoomStore()
     <th>Habitación</th>
     <th>Piso</th> 
     <th>Tipo</th>
-    <!-- Genera dinámicamente los encabezados de fecha -->
-    <template v-if="roomStore.dateTH.size > 0">
-      <th v-for="n in roomStore.dateTH" :key="n">
-        {{ dayjs(n).format("DD/MM/YYYY") }}
-      </th>
-    </template>
+    <th v-for="date in roomDates" :key="date">
+      {{ dayjs(date).format("DD/MM/YYYY") }}
+    </th>
   </tr>
 </thead>
         <tbody>
             <tr v-for="room in roomStore.filteredRooms" :key="room.id">
-                <RoomRow :room="room"></RoomRow>
+                <RoomRow :room="room" :dates="roomDates"></RoomRow>
             </tr>
         </tbody>
     </table>

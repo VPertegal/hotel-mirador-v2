@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "dayjs": "^1.11.23",
     "pinia": "^4.1.0",
     "pinia-plugin-persistedstate": "^4.7.1",
