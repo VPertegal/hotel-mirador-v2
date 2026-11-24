@@ -149,7 +149,7 @@ const  funSubmit = async () => {
   if (!saved) return;
 }
 
-router.push({ path: "/bookinghistory/:id_booking" });
+router.push({ path: "/bookinghistory" });
     
 }
 }
