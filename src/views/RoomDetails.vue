@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoomStore } from '../stores/room';
 import { watch } from 'vue';
+import dayjs from 'dayjs';
 // @ts-ignore TypeScript has no declaration for this Vue component.
 import HeaderComponent from '../components/HeaderComponent.vue';
 
@@ -11,86 +12,85 @@ const roomStore = useRoomStore()
 const name = ref("")
 const dni = ref("")
 
+// Obtenemos la habitación de forma reactiva
+const room = computed(() => roomStore.getRoom(route.params.id.toString()));
 
+// El orden de room_states no está garantizado; seleccionamos el estado de hoy.
+const roomState = computed(() => {
+    if (!room.value) return undefined;
 
-let roomID = route.params.id;
-let roomIDS = roomID.toString()
-let room = roomStore.getRoom(roomIDS);
+    return room.value.state?.find(
+        (state) => state.reserved_date === dayjs().format('YYYY-MM-DD')
+    ) || {
+        available: true,
+        dirty: false,
+        reserved: false,
+        occupant: '',
+        dni: "",
+        idBooking: null,
+    };
+});
+
 
 watch(
     () => route.params.id,
     () => {
-        roomID = route.params.id;
-        room = roomStore.getRoom(roomIDS);
-    }
+        name.value = ""
+        dni.value = ""
+        if (!room.value) void roomStore.fetchRooms()
+    },
+    { immediate: true }
 )
 
-const checkIn = () => {
 
-    room!.state[0].occupant = name.value
-    room!.state[0].dni = dni.value
-    room!.state[0].available = false;
-
-    name.value = ""
-    dni.value = ""
-}
-
-const checkOut = () => {
-    alert("Se realizó el check-out")
-    room!.state[0].dirty = true;
-}
-
-const clean = () => {
-    alert("Se limpió la habitación. Disponible")
-    room!.state[0].dirty = false;
-    room!.state[0].available = true;
-}
 
 </script>
 <template>
     <HeaderComponent />
     <h2>Detalles de la habitación</h2>
-    <h3 v-if="!room">La habitación no existe</h3>
+    <h3 v-if="!roomState">
+        {{ roomStore.cargando ? 'Cargando habitación...' : 'La habitación no existe' }}
+    </h3>
     <div v-else class="room-details-container">
 
         <section class="room-details">
 
 
-            <h4>Habitación: {{ room.id }}</h4>
+            <h4>Habitación: {{ route.params.id }}</h4>
 
-            <p>Planta: {{ room.floor }}</p>
-            <p>Tipo: {{ room.roomType }}</p>
-            <p v-if="room.state[0].available">Estado: Disponible</p>
-            <p v-else-if="!room.state[0].available && !room.state[0].dirty"> Estado: No disponible <br>
-                Ocupada por: {{ room.state[0].occupant }}
+            <p>Planta: {{ room?.floor }}</p>
+            <p>Tipo: {{ room?.roomType }}</p>
+            <p v-if="roomState.available">Estado: Disponible</p>
+            <p v-else-if="!roomState.available && !roomState.dirty"> Estado: No disponible <br>
+                Ocupada por: {{ roomState.occupant }}
             </p>
             <p v-else>Estado: Sucia</p>
         </section>
 
         <section class="booking-actions">
-            <div v-if="room.state[0].available">
-                <form class="formu" @submit.prevent="checkIn">
+            <div v-if="roomState.available">
+                <form class="formu" @submit.prevent="roomStore.checkIn(route.params.id.toString(), name, dni)">
                     <label class="labels">Nombre: </label>
                     <input type="text" placeholder="Inserte nombre" v-model="name" required>
                     <br>
                     <label class="labels">DNI: </label>
                     <input type="text" placeholder="Inserte DNI" v-model="dni" required>
                     <br>
-                    <button style="background-color: green; color: white; border-radius: 5px;">Check-in</button>
+                    <button style="background-color: green; color: white; border-radius: 5px;" >Check-in</button>
                 </form>
             </div>
-            <div v-if="!room.state[0].available && !room.state[0].dirty">
+            <div v-if="!roomState.available && !roomState.dirty">
 
-                <button v-on:click="checkOut" style="background-color: red; color: white; border-radius: 5px;">Check-out</button>
+                <button v-on:click="roomStore.checkOut(route.params.id.toString())" style="background-color: red; color: white; border-radius: 5px;">Check-out</button>
 
             </div>
-            <div v-if="room.state[0].dirty">
-                <button v-on:click="clean" style="background-color: yellow; color: black; border-radius: 5px;">Limpiar</button>
+            <div v-if="roomState.dirty">
+                <button v-on:click="roomStore.clean(route.params.id.toString())" style="background-color: yellow; color: black; border-radius: 5px;">Limpiar</button>
             </div>
             <div>
                 <p>
                
-                    <RouterLink :to="{ name: 'bookRoom', params: { id: room?.id } }"> <button style="background-color: blue; color: white; border-radius: 5px;">Reservar habitación </button>
+                    <RouterLink :to="{ name: 'bookRoom', params: { id: route.params.id } }"> <button style="background-color: blue; color: white; border-radius: 5px;">Reservar habitación </button>
                     </RouterLink>
                 </p>
             </div>

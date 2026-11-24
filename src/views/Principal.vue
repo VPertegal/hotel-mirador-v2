@@ -9,5 +9,7 @@ import HeaderComponent from '../components/HeaderComponent.vue';
 <template>
     <HeaderComponent />
    <h1>Hotel Mirador</h1>
+
+   
 </template>
 <style></style>

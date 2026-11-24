@@ -28,10 +28,10 @@ const handleFilter = (e: Event) => {
         </datalist>
 
         <label class="labels">Disponible:</label>
-        <input type="checkbox" v-model="roomStore.filters.available">
+        <input name="available" type="checkbox" v-model="roomStore.filters.available">
 
         <label class="labels">Sucia:</label>
-        <input type="checkbox" v-model="roomStore.filters.dirty">
+        <input name="dirty" type="checkbox" v-model="roomStore.filters.dirty">
       
     </form>
 </template>
