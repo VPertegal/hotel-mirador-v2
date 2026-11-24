@@ -110,11 +110,11 @@ watch(
      
      
       <RouterLink :to="{ name: 'bookUpdate', params: { id_booking: route.params.id_booking } }">
-      <button>Modificar</button>
+      <button style="background-color: blue; color: white; border-radius: 5px; ">Modificar</button>
       </RouterLink> 
       
        
-      <button v-on:click="deleteBook()">Borrar</button>
+      <button v-on:click="deleteBook()" style="background-color: red; color: white; border-radius: 5px; margin-left: 20px; ">Borrar</button>
       
 
     </td>

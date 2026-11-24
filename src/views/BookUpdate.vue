@@ -150,7 +150,7 @@ const  funSubmit = async () => {
 }
 
 
-router.push({ path: "/bookinghistory" });
+router.push({ path: "/rooms" });
 
     
 }
@@ -188,7 +188,7 @@ watch(bookDetails, details => {
 </script>
 <template>
     <HeaderComponent />
-    <h2>Actualizar reserva {{ bookDetails?.id_booking }} para la habitación {{ room?.id }}</h2>
+    <h2>Modificar reserva {{ bookDetails?.id_booking }} para la habitación {{ room?.id }}</h2>
     <div class="form-container"> 
     <form @submit.prevent="funSubmit">
         <section class="form-section">
@@ -254,7 +254,7 @@ watch(bookDetails, details => {
 
         </section>
         <section class="form-btn">
-        <button style="background-color: blue; color: white; border-radius: 5px; ">Reserva</button>
+        <button style="background-color: blue; color: white; border-radius: 5px; ">Modificar</button>
         </section>
     </form>
     </div>
